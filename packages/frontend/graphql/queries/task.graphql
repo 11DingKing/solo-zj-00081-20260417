@@ -1,0 +1,22 @@
+query tasks {
+  tasks {
+    id
+    title
+    createdAt
+    updatedAt
+    taskContents {
+      id
+      checked
+      title
+      createdAt
+      updatedAt
+    }
+    taskCategoryRelation {
+      category {
+        id
+        name
+        color
+      }
+    }
+  }
+}

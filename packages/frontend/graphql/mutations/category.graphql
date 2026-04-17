@@ -1,0 +1,11 @@
+mutation addCategory($category: AddCategoryInput!) {
+  saveCategory(category: $category) {
+    id
+  }
+}
+
+mutation deleteCategory($id: Int!) {
+  deleteCategory(id: $id) {
+    id
+  }
+}
