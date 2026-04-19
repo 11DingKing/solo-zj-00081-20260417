@@ -11,14 +11,20 @@ import { CategoriesDocument, TasksDocument, useTasksQuery } from "@/graphql/gene
 export const getServerSideProps = async () => {
   const apolloClient = initializeApollo();
 
-  await Promise.all([
-    apolloClient.query({
-      query: TasksDocument,
-    }),
-    apolloClient.query({
-      query: CategoriesDocument,
-    }),
-  ]);
+  try {
+    await Promise.all([
+      apolloClient.query({
+        query: TasksDocument,
+        fetchPolicy: "network-only",
+      }),
+      apolloClient.query({
+        query: CategoriesDocument,
+        fetchPolicy: "network-only",
+      }),
+    ]);
+  } catch (error) {
+    console.error("SSR GraphQL query failed:", error);
+  }
 
   return {
     props: {

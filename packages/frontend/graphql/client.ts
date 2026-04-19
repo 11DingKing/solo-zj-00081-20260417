@@ -16,38 +16,30 @@ function createApolloClient() {
     ssrMode: isServer,
     uri: `${APOLLO_URI}/graphql`,
     cache: new InMemoryCache(),
-    defaultOptions: isServer
-      ? {
-          watchQuery: {
-            fetchPolicy: "no-cache",
-            errorPolicy: "ignore",
-          },
-          query: {
-            fetchPolicy: "no-cache",
-            errorPolicy: "all",
-          },
-        }
-      : undefined,
   });
 }
 
 export function initializeApollo(initialState?: NormalizedCacheObject) {
-  const _apolloClient = apolloClient ?? createApolloClient();
+  const isServer = typeof window === "undefined";
 
-  if (initialState) {
-    const existingCache = _apolloClient.extract();
-    _apolloClient.cache.restore({ ...existingCache, ...initialState });
-  }
-
-  if (typeof window === "undefined") {
-    return _apolloClient;
+  if (isServer) {
+    const freshClient = createApolloClient();
+    if (initialState) {
+      freshClient.cache.restore(initialState);
+    }
+    return freshClient;
   }
 
   if (!apolloClient) {
-    apolloClient = _apolloClient;
+    apolloClient = createApolloClient();
   }
 
-  return _apolloClient;
+  if (initialState) {
+    const existingCache = apolloClient.extract();
+    apolloClient.cache.restore({ ...existingCache, ...initialState });
+  }
+
+  return apolloClient;
 }
 
 export function useApollo(initialState?: NormalizedCacheObject) {
