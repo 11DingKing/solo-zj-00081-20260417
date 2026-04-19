@@ -3,6 +3,7 @@ FROM node:14-alpine
 WORKDIR /app
 
 ENV NODE_ENV=production
+ENV PRISMA_CLI_BINARY_TARGETS=linux-musl
 
 COPY . .
 

@@ -1,7 +1,11 @@
 version: "3"
 
 x-dev-base: &dev-base
-  build: .
+  platform: linux/amd64
+  build: 
+    context: .
+    args:
+      - PLATFORM=linux/amd64
   environment:
     DATABASE_URL: mysql://docker:docker@mysql:3306/nest_next_sample
     SERVER_APOLLO_URI: http://backend:3300
@@ -16,6 +20,7 @@ x-dev-base: &dev-base
 services:
 
   mysql:
+    platform: linux/amd64
     image: mysql:8.0
     command: mysqld
     environment:
@@ -50,9 +55,12 @@ services:
 
   backend-prod:
     << : *dev-base
+    platform: linux/amd64
     build:
       context: .
       dockerfile: Dockerfile.prod
+      args:
+        - PLATFORM=linux/amd64
     tty: true
     depends_on:
       - mysql
