@@ -1,24 +1,34 @@
 import React, { memo } from "react";
 
 import { css } from "@emotion/react";
-import { InferGetServerSidePropsType } from "next";
 import Head from "next/head";
 import { Container, Header } from "semantic-ui-react";
 
 import { TaskList } from "@/components/TaskList";
-import { client } from "@/graphql/client";
-import { TasksDocument, TasksQuery, TasksQueryVariables, useTasksQuery } from "@/graphql/generated";
+import { initializeApollo } from "@/graphql/client";
+import { CategoriesDocument, TasksDocument, useTasksQuery } from "@/graphql/generated";
 
 export const getServerSideProps = async () => {
-  const { data } = await client.query<TasksQuery, TasksQueryVariables>({
-    query: TasksDocument,
-  });
-  return { props: { initialData: data } };
+  const apolloClient = initializeApollo();
+
+  await Promise.all([
+    apolloClient.query({
+      query: TasksDocument,
+    }),
+    apolloClient.query({
+      query: CategoriesDocument,
+    }),
+  ]);
+
+  return {
+    props: {
+      initialApolloState: apolloClient.cache.extract(),
+    },
+  };
 };
 
-export default memo<InferGetServerSidePropsType<typeof getServerSideProps>>(({ initialData }) => {
+const IndexPage = memo(() => {
   const { data, refetch } = useTasksQuery();
-  const tasksData = data ? data.tasks : initialData.tasks;
 
   return (
     <div>
@@ -33,8 +43,12 @@ export default memo<InferGetServerSidePropsType<typeof getServerSideProps>>(({ i
         `}
       >
         <Header as="h1">Nest Next TODO Sample</Header>
-        <TaskList tasksData={tasksData} refetchTasks={refetch} />
+        <TaskList tasksData={data?.tasks ?? []} refetchTasks={refetch} />
       </Container>
     </div>
   );
 });
+
+IndexPage.displayName = "IndexPage";
+
+export default IndexPage;
